@@ -1,0 +1,206 @@
+/* GENERAL */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+header {
+    background-color: #2C2C54;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    flex-wrap: wrap;
+}
+
+header .left img {
+    height: 50px;
+}
+
+header .center h1 {
+    font-size: 22px;
+}
+
+header .right {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-header {
+    background-color: #706FD3;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.container {
+    display: flex;
+    height: calc(100vh - 80px);
+}
+
+/* COLUMNA FORMULARIO */
+.form-box {
+    width: 50%;
+    background-color: #FFE8B6;
+    padding: 60px;
+}
+
+.form-box h2 {
+    margin-bottom: 20px;
+    font-size: 26px;
+}
+
+.form-box label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.form-box input,
+.form-box select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+}
+
+.btn-enviar {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background-color: #40407A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-enviar:hover {
+    background-color: #706FD3;
+}
+
+/* COLUMNA DERECHA */
+.info-box {
+    width: 60%;
+    background-color: #F9E595;
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.info-box h2 {
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+.info-box p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+/* FOOTER */
+footer {
+    background-color: #2C2C54;
+    color: white;
+    padding: 35px 30px;
+    display: flex;
+    justify-content: space-between;
+}
+
+footer ul {
+    list-style: none;
+}
+
+footer ul li {
+    margin-bottom: 8px;
+}
+
+footer h3 {
+    margin-bottom: 8px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 850px) {
+    .container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .form-box,
+    .info-box {
+        width: 100%;
+    }
+}
+
+
+
+/* Contenedor general del formulario */
+.form-section {
+    width:100%;
+    background-color: #F9E595;
+    padding: 30px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: stretch; /* Para que la carta crezca verticalmente */
+}
+
+/* Tarjeta del formulario */
+.form-card {
+    background-color: #FFF6D5;
+    padding: 30px;
+    width: 80%;
+    height: 100%;         /* << AQUÍ SE SOLUCIONA */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    overflow-y: auto;     /* Evita que el contenido se salga */
+    box-sizing: border-box;
+}
+
+/* Título */
+.form-card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2C2C54;
+}
+
+/* Inputs */
+.form-card input,
+.form-card select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+/* Botón */
+.btn-registrar {
+    width: 100%;              /* 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥 Ya no se sale */
+    padding: 12px;
+    background-color: #40407A;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-registrar:hover {
+    background-color: #2C2C54;
+}
+
