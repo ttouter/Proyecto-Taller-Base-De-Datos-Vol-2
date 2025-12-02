@@ -1,6 +1,22 @@
 <?php
 session_start();
-$nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "Administrador";
+
+// 1. Verificación de Seguridad
+if (!isset($_SESSION['rol_activo']) || $_SESSION['rol_activo'] !== 'organizador') {
+    header("Location: ../login/login_unificado.php");
+    exit();
+}
+
+require_once '../../models/ModeloAdmin.php';
+require_once '../../models/ModeloProcesos.php'; // Necesario para listar escuelas en el modal
+
+// 2. Obtener Datos
+$resumen = ModeloAdmin::obtenerResumen(); 
+$listaEquipos = ModeloAdmin::listarEquipos();
+$listaUsuarios = ModeloAdmin::listarUsuarios();
+$listaEscuelas = ModeloProcesos::listarEscuelas(); // Para el modal de asignación
+
+$nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -11,12 +27,36 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
     <link rel="icon" type="image/x-icon" href="../../assets/img/fav-robot.ico">
     
     <!-- ESTILOS -->
-    <!-- 1. Estilos Base -->
     <link rel="stylesheet" href="../../assets/css/styles_asistenteDashboard.css">
-    <!-- 2. Estilos Admin -->
     <link rel="stylesheet" href="../../assets/css/styles_admin.css">
-    <!-- 3. Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Estilos rápidos para el Modal dentro del Dashboard */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+            justify-content: center; 
+            align-items: center;
+        }
+        .modal-content-box {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+        .close-modal { float: right; font-size: 24px; cursor: pointer; color: #aaa; }
+        .close-modal:hover { color: #000; }
+    </style>
 </head>
 <body>
 
@@ -30,13 +70,11 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
             <p>Panel de Organizador</p>
         </div>
 
-        <!-- MENÚ: Fíjate que ahora usamos href="#id" y NO onclick -->
         <ul class="sidebar-menu">
             <li><a href="#resumen" class="nav-link active"><i class="fas fa-home"></i> Resumen</a></li>
             <li><a href="#eventos" class="nav-link"><i class="fas fa-calendar-alt"></i> Gestión de Eventos</a></li>
             <li><a href="#escuelas" class="nav-link"><i class="fas fa-university"></i> Escuelas</a></li>
             <li><a href="#usuarios" class="nav-link"><i class="fas fa-users"></i> Monitor Usuarios</a></li>
-            <!-- Cerrar sesión es un enlace normal a PHP, no lleva # -->
             <li><a href="../login/terminarSesion_organizador.php" class="logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
         </ul>
     </nav>
@@ -47,7 +85,7 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
         <header class="content-header">
             <h1>Panel de Administración</h1>
             <div class="user-info">
-                <span>Hola, <?php echo $nombre_admin; ?></span>
+                <span>Hola, <?php echo htmlspecialchars($nombre_admin); ?></span>
                 <i class="fas fa-user-circle fa-lg" style="margin-left: 10px; color: #2C2C54;"></i>
             </div>
         </header>
@@ -59,28 +97,28 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
                     <div class="icon"><i class="fas fa-robot"></i></div>
                     <div class="info">
                         <h3>Equipos</h3>
-                        <p class="number">24</p>
+                        <p class="number"><?php echo $resumen['total_equipos']; ?></p>
                     </div>
                 </div>
                 <div class="stat-card yellow">
                     <div class="icon"><i class="fas fa-calendar-check"></i></div>
                     <div class="info">
                         <h3>Eventos Activos</h3>
-                        <p class="number">3</p>
+                        <p class="number"><?php echo $resumen['eventos_activos']; ?></p>
                     </div>
                 </div>
                 <div class="stat-card red">
                     <div class="icon"><i class="fas fa-gavel"></i></div>
                     <div class="info">
                         <h3>Jueces</h3>
-                        <p class="number">8</p>
+                        <p class="number"><?php echo $resumen['total_jueces']; ?></p>
                     </div>
                 </div>
                 <div class="stat-card green">
                     <div class="icon"><i class="fas fa-user-friends"></i></div>
                     <div class="info">
                         <h3>Participantes</h3>
-                        <p class="number">150+</p>
+                        <p class="number"><?php echo $resumen['total_participantes']; ?></p>
                     </div>
                 </div>
             </div>
@@ -99,20 +137,23 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>101</td>
-                                <td>RoboTigers</td>
-                                <td>Preparatoria</td>
-                                <td>Tec Madero</td>
-                                <td><span class="status active">Activo</span></td>
-                            </tr>
-                            <tr>
-                                <td>102</td>
-                                <td>MechaWarriors</td>
-                                <td>Universidad</td>
-                                <td>Polytechnic</td>
-                                <td><span class="status pending">Pendiente</span></td>
-                            </tr>
+                            <?php if(empty($listaEquipos)): ?>
+                                <tr><td colspan="5">No hay equipos registrados aún.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($listaEquipos as $equipo): ?>
+                                <tr>
+                                    <td><?php echo $equipo['idEquipo']; ?></td>
+                                    <td><?php echo htmlspecialchars($equipo['nombreEquipo']); ?></td>
+                                    <td><?php echo htmlspecialchars($equipo['categoria']); ?></td>
+                                    <td><?php echo htmlspecialchars($equipo['nombreEscuela']); ?></td>
+                                    <td>
+                                        <span class="status <?php echo ($equipo['estado'] == 'Activo') ? 'active' : 'pending'; ?>">
+                                            <?php echo $equipo['estado']; ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -163,7 +204,7 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
             </div>
         </div>
 
-        <!-- SECCIÓN: USUARIOS -->
+        <!-- SECCIÓN: USUARIOS (Aquí es donde agregamos la gestión de roles) -->
         <div id="usuarios" class="content-section">
             <div class="form-section">
                 <h2 style="color: #2C2C54;">Directorio de Usuarios</h2>
@@ -174,18 +215,35 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
                                 <th>ID</th>
                                 <th>Nombre</th>
                                 <th>Email</th>
-                                <th>Rol</th>
-                                <th>Acciones</th>
+                                <th>Rol Detectado</th>
+                                <th>Acciones</th> <!-- Nueva Columna -->
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Juan Pérez</td>
-                                <td>juan@email.com</td>
-                                <td><span class="badge role-coach">Entrenador</span></td>
-                                <td><button class="btn-icon delete"><i class="fas fa-trash"></i></button></td>
-                            </tr>
+                            <?php if(empty($listaUsuarios)): ?>
+                                <tr><td colspan="5">No hay usuarios registrados.</td></tr>
+                            <?php else: ?>
+                                <?php foreach ($listaUsuarios as $usr): ?>
+                                <tr>
+                                    <td><?php echo $usr['idAsistente']; ?></td>
+                                    <td><?php echo htmlspecialchars($usr['nombre'] . ' ' . $usr['apellidoPat']); ?></td>
+                                    <td><?php echo htmlspecialchars($usr['email']); ?></td>
+                                    <td>
+                                        <span class="badge <?php echo (strpos($usr['rol_detectado'], 'Juez') !== false) ? 'role-judge' : 'role-coach'; ?>">
+                                            <?php echo $usr['rol_detectado']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <!-- Botón para abrir el Modal -->
+                                        <button class="btn-icon edit" 
+                                                onclick="abrirModalRol(<?php echo $usr['idAsistente']; ?>, '<?php echo htmlspecialchars($usr['nombre']); ?>')"
+                                                title="Asignar Rol">
+                                            <i class="fas fa-user-tag"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -193,11 +251,90 @@ $nombre_admin = isset($_SESSION['admin_nombre']) ? $_SESSION['admin_nombre'] : "
         </div>
 
     </main>
+
+    <!-- MODAL PARA ASIGNAR ROL -->
+    <div id="modalAsignarRol" class="modal">
+        <div class="modal-content-box">
+            <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            <h2 style="color: #2C2C54; margin-bottom: 20px;">Gestionar Rol de Usuario</h2>
+            <p id="modalUserName" style="margin-bottom: 15px; font-weight: bold; color: #555;">Usuario: ...</p>
+            
+            <form action="../../controllers/control_asignar_rol.php" method="POST">
+                <input type="hidden" name="idAsistente" id="modalIdAsistente">
+                
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Tipo de Rol</label>
+                    <select name="tipoRol" id="selectTipoRol" onchange="toggleGradoEstudios()" required>
+                        <option value="entrenador">Entrenador</option>
+                        <option value="juez">Juez</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Escuela / Institución</label>
+                    <select name="codEscuela" required>
+                        <option value="">-- Seleccionar --</option>
+                        <?php foreach($listaEscuelas as $esc): ?>
+                            <option value="<?php echo $esc['codEscuela']; ?>">
+                                <?php echo htmlspecialchars($esc['nombreEscuela']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <!-- Campo visible solo si es Juez -->
+                <div class="form-group" id="groupGradoEstudios" style="margin-bottom: 15px; display: none;">
+                    <label>Grado de Estudios</label>
+                    <select name="gradoEstudios">
+                        <option value="Licenciatura">Licenciatura</option>
+                        <option value="Maestria">Maestría</option>
+                        <option value="Doctorado">Doctorado</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary" style="width: 100%;">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
 </div>
 
-<!-- CARGAR SCRIPT JS -->
-<!-- Ajusta la ruta si tu archivo está en otra carpeta -->
+<!-- Scripts -->
 <script src="../../assets/js/admin_script.js"></script>
+<script>
+    // Lógica específica para el modal de roles
+    const modal = document.getElementById('modalAsignarRol');
+    const inputId = document.getElementById('modalIdAsistente');
+    const labelUser = document.getElementById('modalUserName');
+    const selectRol = document.getElementById('selectTipoRol');
+    const groupGrado = document.getElementById('groupGradoEstudios');
+
+    function abrirModalRol(id, nombre) {
+        inputId.value = id;
+        labelUser.textContent = "Usuario: " + nombre;
+        modal.style.display = "flex";
+        toggleGradoEstudios(); // Reset state
+    }
+
+    function cerrarModal() {
+        modal.style.display = "none";
+    }
+
+    function toggleGradoEstudios() {
+        if(selectRol.value === 'juez') {
+            groupGrado.style.display = 'block';
+        } else {
+            groupGrado.style.display = 'none';
+        }
+    }
+
+    // Cerrar si se da clic fuera del contenido
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            cerrarModal();
+        }
+    }
+</script>
 
 </body>
 </html>

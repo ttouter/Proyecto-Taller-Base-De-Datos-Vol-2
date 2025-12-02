@@ -25,6 +25,11 @@ if (isset($_SESSION['rol_activo'])) {
 </head>
 <body>
 
+    <!-- BOTÓN DE REGRESO AL INICIO (Asegúrate de que esta línea exista) -->
+    <a href="../index/Index.html" class="btn-back-home">
+        <i class="fas fa-arrow-left"></i> Regresar al Inicio
+    </a>
+
     <div class="login-wrapper">
         <!-- Panel Izquierdo (Imagen/Decoración) -->
         <div class="login-left">

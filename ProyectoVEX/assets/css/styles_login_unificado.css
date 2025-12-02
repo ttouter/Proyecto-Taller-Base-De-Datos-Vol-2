@@ -14,6 +14,7 @@ body {
     background: linear-gradient(135deg, #40407A 0%, #2C2C54 100%) !important;
     background-color: #2C2C54; 
     background-attachment: fixed;
+    position: relative; /* Importante para el botón absoluto */
 }
 
 .login-wrapper {
@@ -24,6 +25,8 @@ body {
     border-radius: 20px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     overflow: hidden;
+    position: relative;
+    z-index: 5; /* Por encima del fondo */
 }
 
 /* --- PANEL IZQUIERDO (IMAGEN) --- */
@@ -211,10 +214,51 @@ body {
 }
 .alert.error { background: #ffeaa7; color: #d63031; border: 1px solid #fdcb6e; }
 
+/* BOTÓN REGRESAR AL INICIO (ACTUALIZADO) */
+.btn-back-home {
+    position: fixed; /* Cambiado a fixed para asegurar que siempre sea visible */
+    top: 25px;
+    right: 30px;
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15); /* Fondo semitransparente */
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    z-index: 9999; /* Z-index muy alto para estar encima de todo */
+}
+
+.btn-back-home:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.btn-back-home i {
+    font-size: 16px;
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
     .login-wrapper { width: 90%; height: auto; flex-direction: column; }
     .login-left { height: 150px; flex: none; }
     .overlay { padding: 20px; }
     .login-right { padding: 30px; }
+    
+    /* Ajuste botón responsive */
+    .btn-back-home {
+        top: 15px;
+        right: 15px;
+        font-size: 12px;
+        padding: 8px 15px;
+        background: rgba(44, 44, 84, 0.9); /* Fondo más sólido en móvil */
+    }
 }

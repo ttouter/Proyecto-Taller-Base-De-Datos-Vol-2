@@ -2,14 +2,24 @@
 
 class ModeloEvaluacion {
 
+    // NUEVO: OBTENER EQUIPOS ASIGNADOS AL JUEZ
+    public static function obtenerEquiposAsignados($idJuez) {
+        global $pdo;
+        try {
+            $stmt = $pdo->prepare("CALL ObtenerEquiposPorJuez(:id)");
+            $stmt->execute([':id' => $idJuez]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
     public static function guardarEvaluacionCompleta($datos) {
         global $pdo;
-        $mensajes = [];
-
         try {
-            $pdo->beginTransaction(); // Usamos transacción para asegurar que se guarden las 3 o ninguna
+            $pdo->beginTransaction(); 
 
-            // 1. Guardar Diseño
+            // 1. Diseño
             $stmt1 = $pdo->prepare("CALL AltaEvaluacionDiseno(:juez, :equipo, :v1, :v2, :v3, :v4, :v5, @msg1)");
             $stmt1->execute([
                 ':juez' => $datos['idJuez'],
@@ -21,7 +31,7 @@ class ModeloEvaluacion {
                 ':v5' => $datos['disenoYModelado']
             ]);
             
-            // 2. Guardar Programación
+            // 2. Programación
             $stmt2 = $pdo->prepare("CALL AltaEvaluacionProgramacion(:juez, :equipo, :v1, :v2, :v3, :v4, :v5, @msg2)");
             $stmt2->execute([
                 ':juez' => $datos['idJuez'],
@@ -33,7 +43,7 @@ class ModeloEvaluacion {
                 ':v5' => $datos['controlDriver']
             ]);
 
-            // 3. Guardar Construcción
+            // 3. Construcción
             $stmt3 = $pdo->prepare("CALL AltaEvaluacionConstruccion(:juez, :equipo, :v1, :v2, :v3, :v4, :v5, @msg3)");
             $stmt3->execute([
                 ':juez' => $datos['idJuez'],
@@ -46,11 +56,11 @@ class ModeloEvaluacion {
             ]);
 
             $pdo->commit();
-            return "Evaluación guardada correctamente en todas las categorías.";
+            return "Evaluación guardada correctamente.";
 
         } catch (PDOException $e) {
             $pdo->rollBack();
-            return "Error al guardar evaluación: " . $e->getMessage();
+            return "Error al guardar: " . $e->getMessage();
         }
     }
 }
