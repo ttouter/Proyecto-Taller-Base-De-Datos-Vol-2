@@ -10,6 +10,50 @@
     <link rel="stylesheet" href="../../assets/css/styles_registro_moderno.css">
     <!-- Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Estilos específicos para la validación de contraseña -->
+    <style>
+        .password-requirements {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .password-requirements li {
+            margin-bottom: 5px;
+            color: #666;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .password-requirements li i {
+            font-size: 12px;
+        }
+
+        /* Clases para estado válido/inválido */
+        .req-valid {
+            color: #27ae60 !important; /* Verde */
+            font-weight: 500;
+        }
+        
+        .req-invalid {
+            color: #e74c3c; /* Rojo */
+        }
+
+        /* Deshabilitar botón visualmente */
+        button:disabled {
+            background: #95a5a6 !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -58,7 +102,7 @@
                     <p>Completa tus datos para comenzar</p>
                 </div>
 
-                <!-- Muestra errores si existen (puedes conectar esto con tu lógica PHP) -->
+                <!-- Muestra errores si existen -->
                 <?php if (isset($_GET['error'])): ?>
                     <div class="alert error">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -66,7 +110,7 @@
                     </div>
                 <?php endif; ?>
 
-                <form action="../../controllers/control_registro.php" method="POST" class="register-form">
+                <form action="../../controllers/control_registro.php" method="POST" class="register-form" id="registroForm">
                     
                     <div class="form-row">
                         <div class="input-group">
@@ -114,17 +158,27 @@
                         </div>
                     </div>
 
+                    <!-- CAMBIO: Campo de contraseña con validación -->
                     <div class="input-group">
                         <label>Contraseña</label>
                         <div class="input-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input type="password" name="password" placeholder="Crea una contraseña segura" required>
+                            <input type="password" name="password" id="passwordInput" placeholder="Crea una contraseña segura" required>
+                            <i class="fas fa-eye" id="togglePassword" style="left: auto; right: 15px; cursor: pointer;"></i>
                         </div>
-                        <small class="hint">Mínimo 8 caracteres</small>
+                        
+                        <!-- Lista de requisitos dinámica -->
+                        <ul class="password-requirements">
+                            <li id="req-length" class="req-invalid"><i class="fas fa-circle"></i> Mínimo 8 caracteres</li>
+                            <li id="req-upper" class="req-invalid"><i class="fas fa-circle"></i> Al menos una mayúscula</li>
+                            <li id="req-lower" class="req-invalid"><i class="fas fa-circle"></i> Al menos una minúscula</li>
+                            <li id="req-number" class="req-invalid"><i class="fas fa-circle"></i> Al menos un número</li>
+                            <li id="req-special" class="req-invalid"><i class="fas fa-circle"></i> Carácter especial (!@#$%)</li>
+                        </ul>
                     </div>
 
                     <div class="actions">
-                        <button type="submit" class="btn-register">
+                        <button type="submit" class="btn-register" id="btnSubmit" disabled>
                             Registrarme <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
@@ -136,6 +190,60 @@
             </div>
         </div>
     </div>
+
+    <!-- SCRIPT DE VALIDACIÓN -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            const togglePassword = document.getElementById('togglePassword');
+            const submitButton = document.getElementById('btnSubmit');
+
+            // Requisitos
+            const requirements = {
+                length: { regex: /.{8,}/, element: document.getElementById('req-length') },
+                upper: { regex: /[A-Z]/, element: document.getElementById('req-upper') },
+                lower: { regex: /[a-z]/, element: document.getElementById('req-lower') },
+                number: { regex: /[0-9]/, element: document.getElementById('req-number') },
+                special: { regex: /[!@#$%^&*(),.?":{}|<>]/, element: document.getElementById('req-special') }
+            };
+
+            // Función para alternar visibilidad contraseña
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+
+            // Función de validación
+            passwordInput.addEventListener('keyup', function() {
+                const value = passwordInput.value;
+                let allValid = true;
+
+                for (const key in requirements) {
+                    const req = requirements[key];
+                    const isValid = req.regex.test(value);
+                    const icon = req.element.querySelector('i');
+
+                    if (isValid) {
+                        req.element.classList.remove('req-invalid');
+                        req.element.classList.add('req-valid');
+                        icon.classList.remove('fa-circle');
+                        icon.classList.add('fa-check-circle');
+                    } else {
+                        req.element.classList.remove('req-valid');
+                        req.element.classList.add('req-invalid');
+                        icon.classList.remove('fa-check-circle');
+                        icon.classList.add('fa-circle');
+                        allValid = false;
+                    }
+                }
+
+                // Habilitar/Deshabilitar botón
+                submitButton.disabled = !allValid;
+            });
+        });
+    </script>
 
 </body>
 </html>
