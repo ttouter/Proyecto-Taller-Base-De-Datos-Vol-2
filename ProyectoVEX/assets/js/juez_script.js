@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('.content-section');
     const btnEvaluarList = document.querySelectorAll('.btn-evaluar');
-    const btnCancelarEval = document.getElementById('btn-cancelar-eval');
     const navEvaluacion = document.getElementById('nav-evaluacion');
     
     // --- NAVEGACIÓN SPA ---
@@ -28,8 +27,15 @@ document.addEventListener('DOMContentLoaded', function() {
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            navigateTo(targetId);
+            // Asegurarnos de obtener solo el ID (sin el #)
+            const href = this.getAttribute('href');
+            if (href.startsWith('#')) {
+                const targetId = href.substring(1);
+                navigateTo(targetId);
+            } else {
+                // Si es un enlace normal (como Cerrar Sesión), dejamos que navegue
+                window.location.href = href;
+            }
         });
     });
 
@@ -49,15 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             navigateTo('evaluacion');
         });
-    });
-
-    // --- CANCELAR EVALUACIÓN ---
-    btnCancelarEval.addEventListener('click', function() {
-        if(confirm('¿Salir sin guardar? Se perderán los datos no guardados.')) {
-            navigateTo('equipos'); // Volver a la lista
-            navEvaluacion.classList.add('hidden-nav'); // Ocultar del menú
-            document.getElementById('formEvaluacion').reset(); // Limpiar form
-        }
     });
 
     // --- TABS INTERNOS DEL FORMULARIO (Diseño / Progra / Construcción) ---

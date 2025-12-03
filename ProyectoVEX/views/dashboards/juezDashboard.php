@@ -32,6 +32,25 @@ $pendientes = $totalAsignados - $completados;
     <link rel="stylesheet" href="../../assets/css/styles_asistenteDashboard.css">
     <link rel="stylesheet" href="../../assets/css/styles_juez.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- CORRECCIÓN DE NAVEGACIÓN --- */
+        /* Esto oculta las secciones que no están activas */
+        .content-section { 
+            display: none; 
+        }
+        
+        /* Esto muestra la sección activa con una animación */
+        .content-section.active { 
+            display: block; 
+            animation: fadeIn 0.4s ease-in-out; 
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+    </style>
 </head>
 <body>
 
@@ -48,6 +67,7 @@ $pendientes = $totalAsignados - $completados;
             <li><a href="#inicio" class="nav-link active"><i class="fas fa-chart-pie"></i> Inicio</a></li>
             <li><a href="#equipos" class="nav-link"><i class="fas fa-users-cog"></i> Mis Equipos</a></li>
             <li><a href="#evaluacion" class="nav-link hidden-nav" id="nav-evaluacion"><i class="fas fa-clipboard-check"></i> Evaluando...</a></li>
+            <!-- Asegúrate de tener el archivo terminarSesion_juez.php creado -->
             <li><a href="../login/terminarSesion_juez.php" class="logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
         </ul>
     </nav>
@@ -126,7 +146,7 @@ $pendientes = $totalAsignados - $completados;
             </div>
         </div>
 
-        <!-- SECCIÓN: FORMULARIO DE EVALUACIÓN (Idéntica pero conectada) -->
+        <!-- SECCIÓN: FORMULARIO DE EVALUACIÓN -->
         <div id="evaluacion" class="content-section">
             <div class="evaluation-container">
                 <div class="eval-header">
@@ -139,9 +159,7 @@ $pendientes = $totalAsignados - $completados;
                             <span class="score-label">Puntaje Total</span>
                             <span id="score-total" class="score-value">0</span>
                         </div>
-                        <button class="btn-close-eval" id="btn-cancelar-eval">
-                            <i class="fas fa-times"></i> Salir
-                        </button>
+                        <!-- BOTÓN SALIR ELIMINADO AQUÍ -->
                     </div>
                 </div>
 
@@ -157,12 +175,7 @@ $pendientes = $totalAsignados - $completados;
                     <!-- TAB 1: DISEÑO -->
                     <div id="tab-diseno" class="tab-content active">
                         <div class="rubric-grid">
-                            <div class="rubric-item">
-                                <label>Registro de Fechas (0-5)</label>
-                                <input type="number" name="registroDeFechas" min="0" max="5" value="0" required>
-                            </div>
-                            <!-- ... resto de campos de diseño (igual que antes) ... -->
-                            <!-- Por brevedad, asumo que copias los inputs del archivo original -->
+                            <div class="rubric-item"><label>Registro de Fechas (0-5)</label><input type="number" name="registroDeFechas" min="0" max="5" value="0" required></div>
                             <div class="rubric-item"><label>Justificación (0-5)</label><input type="number" name="justificacionDeCambios" min="0" max="5" value="0"></div>
                             <div class="rubric-item"><label>Diagramas (0-5)</label><input type="number" name="diagramasEImagenes" min="0" max="5" value="0"></div>
                             <div class="rubric-item"><label>Video (0-5)</label><input type="number" name="videoYAnimacion" min="0" max="5" value="0"></div>

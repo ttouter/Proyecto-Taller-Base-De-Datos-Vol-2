@@ -1,13 +1,13 @@
 <?php
 session_start();
 
-// Destruir todas las variables de sesión
+// 1. Vaciar todas las variables de sesión
 $_SESSION = [];
 
-// Destruir la sesión
+// 2. Destruir la sesión completamente
 session_destroy();
 
-// Redirigir al login de asistente
-header("Location: ../login/inicioSesion_entrenador.php");
+// 3. CAMBIO: Redirigir al Index principal en lugar del login
+header("Location: ../index/Index.html");
 exit();
 ?>

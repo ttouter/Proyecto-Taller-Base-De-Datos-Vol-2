@@ -8,13 +8,13 @@ if (!isset($_SESSION['rol_activo']) || $_SESSION['rol_activo'] !== 'organizador'
 }
 
 require_once '../../models/ModeloAdmin.php';
-require_once '../../models/ModeloProcesos.php'; // Necesario para listar escuelas en el modal
+require_once '../../models/ModeloProcesos.php'; 
 
 // 2. Obtener Datos
 $resumen = ModeloAdmin::obtenerResumen(); 
-$listaEquipos = ModeloAdmin::listarEquipos();
+$listaEquipos = ModeloAdmin::listarEquipos(); // Se usa en la tabla de resumen
 $listaUsuarios = ModeloAdmin::listarUsuarios();
-$listaEscuelas = ModeloProcesos::listarEscuelas(); // Para el modal de asignación
+$listaEscuelas = ModeloProcesos::listarEscuelas(); 
 
 $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
 ?>
@@ -56,6 +56,24 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
         @keyframes slideDown { from {transform: translateY(-20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
         .close-modal { float: right; font-size: 24px; cursor: pointer; color: #aaa; }
         .close-modal:hover { color: #000; }
+
+        /* Estilos para la tabla de Reportes */
+        .rank-badge {
+            background-color: #2C2C54;
+            color: #F9E595;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .top-1 { background-color: #f1c40f; color: #fff; transform: scale(1.2); box-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        .top-2 { background-color: #bdc3c7; color: #fff; }
+        .top-3 { background-color: #cd7f32; color: #fff; }
+        
+        .score-total { font-size: 1.2em; font-weight: bold; color: #2C2C54; }
     </style>
 </head>
 <body>
@@ -72,6 +90,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
 
         <ul class="sidebar-menu">
             <li><a href="#resumen" class="nav-link active"><i class="fas fa-home"></i> Resumen</a></li>
+            <li><a href="#reportes" class="nav-link"><i class="fas fa-trophy"></i> Reportes / Ranking</a></li>
             <li><a href="#eventos" class="nav-link"><i class="fas fa-calendar-alt"></i> Gestión de Eventos</a></li>
             <li><a href="#escuelas" class="nav-link"><i class="fas fa-university"></i> Escuelas</a></li>
             <li><a href="#usuarios" class="nav-link"><i class="fas fa-users"></i> Monitor Usuarios</a></li>
@@ -92,6 +111,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
 
         <!-- SECCIÓN: RESUMEN -->
         <div id="resumen" class="content-section active">
+            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card blue">
                     <div class="icon"><i class="fas fa-robot"></i></div>
@@ -123,6 +143,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
                 </div>
             </div>
 
+            <!-- Tabla de Últimos Equipos (Restaurada) -->
             <div class="form-section">
                 <h2 style="color: #2C2C54; border-bottom: 2px solid #F9E595; padding-bottom: 10px; margin-bottom: 20px;">Últimos Equipos Registrados</h2>
                 <div class="table-responsive">
@@ -154,6 +175,38 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
                                 </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: REPORTES (NUEVA) -->
+        <div id="reportes" class="content-section">
+            <div class="form-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                    <h2 style="color: #2C2C54; margin:0;">🏆 Ranking General del Torneo</h2>
+                    <div>
+                        <button onclick="cargarReporte()" class="btn-primary"><i class="fas fa-sync"></i> Actualizar</button>
+                        <button onclick="window.print()" class="btn-secondary"><i class="fas fa-print"></i> Imprimir</button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table" id="tabla-reporte">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Equipo</th>
+                                <th>Escuela</th>
+                                <th>Diseño</th>
+                                <th>Programación</th>
+                                <th>Construcción</th>
+                                <th>TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" style="text-align:center;">Cargando datos...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -204,7 +257,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
             </div>
         </div>
 
-        <!-- SECCIÓN: USUARIOS (Aquí es donde agregamos la gestión de roles) -->
+        <!-- SECCIÓN: USUARIOS -->
         <div id="usuarios" class="content-section">
             <div class="form-section">
                 <h2 style="color: #2C2C54;">Directorio de Usuarios</h2>
@@ -216,7 +269,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
                                 <th>Nombre</th>
                                 <th>Email</th>
                                 <th>Rol Detectado</th>
-                                <th>Acciones</th> <!-- Nueva Columna -->
+                                <th>Acciones</th> 
                             </tr>
                         </thead>
                         <tbody>
@@ -234,7 +287,6 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
                                         </span>
                                     </td>
                                     <td>
-                                        <!-- Botón para abrir el Modal -->
                                         <button class="btn-icon edit" 
                                                 onclick="abrirModalRol(<?php echo $usr['idAsistente']; ?>, '<?php echo htmlspecialchars($usr['nombre']); ?>')"
                                                 title="Asignar Rol">
@@ -282,7 +334,6 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
                     </select>
                 </div>
 
-                <!-- Campo visible solo si es Juez -->
                 <div class="form-group" id="groupGradoEstudios" style="margin-bottom: 15px; display: none;">
                     <label>Grado de Estudios</label>
                     <select name="gradoEstudios">
@@ -302,7 +353,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
 <!-- Scripts -->
 <script src="../../assets/js/admin_script.js"></script>
 <script>
-    // Lógica específica para el modal de roles
+    // Lógica para el modal de roles
     const modal = document.getElementById('modalAsignarRol');
     const inputId = document.getElementById('modalIdAsistente');
     const labelUser = document.getElementById('modalUserName');
@@ -313,7 +364,7 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
         inputId.value = id;
         labelUser.textContent = "Usuario: " + nombre;
         modal.style.display = "flex";
-        toggleGradoEstudios(); // Reset state
+        toggleGradoEstudios(); 
     }
 
     function cerrarModal() {
@@ -328,12 +379,59 @@ $nombre_admin = $_SESSION['usuario_nombre'] ?? "Administrador";
         }
     }
 
-    // Cerrar si se da clic fuera del contenido
     window.onclick = function(event) {
         if (event.target == modal) {
             cerrarModal();
         }
     }
+
+    // --- Lógica para cargar Reportes con Fetch API ---
+    function cargarReporte() {
+        fetch('../../controllers/control_reporte_general.php')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.querySelector('#tabla-reporte tbody');
+                tbody.innerHTML = ''; // Limpiar tabla
+
+                if(data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay evaluaciones registradas aún.</td></tr>';
+                    return;
+                }
+                
+                data.forEach((equipo, index) => {
+                    // Determinar clase para el top 3
+                    let badgeClass = 'rank-badge';
+                    if (index === 0) badgeClass += ' top-1';
+                    if (index === 1) badgeClass += ' top-2';
+                    if (index === 2) badgeClass += ' top-3';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><div class="${badgeClass}">${index + 1}</div></td>
+                        <td><strong>${equipo.nombreEquipo}</strong></td>
+                        <td>${equipo.nombreEscuela}</td>
+                        <td>${equipo.PuntosDiseno} pts</td>
+                        <td>${equipo.PuntosProgra} pts</td>
+                        <td>${equipo.PuntosConstruccion} pts</td>
+                        <td class="score-total">${equipo.GranTotal}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => {
+                console.error('Error cargando reporte:', error);
+                document.querySelector('#tabla-reporte tbody').innerHTML = '<tr><td colspan="7" style="color:red; text-align:center;">Error al cargar datos.</td></tr>';
+            });
+    }
+
+    // Cargar reporte automáticamente si entran directo con el hash #reportes
+    if(window.location.hash === '#reportes') {
+        cargarReporte();
+    }
+    
+    // Asignar el evento al click del menú también
+    document.querySelector('a[href="#reportes"]').addEventListener('click', cargarReporte);
+
 </script>
 
 </body>

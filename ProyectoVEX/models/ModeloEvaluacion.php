@@ -1,10 +1,18 @@
 <?php
+// AGREGA ESTA LÍNEA PARA CARGAR LA CONEXIÓN
+require_once __DIR__ . '/../config/conexion.php';
 
 class ModeloEvaluacion {
 
     // NUEVO: OBTENER EQUIPOS ASIGNADOS AL JUEZ
     public static function obtenerEquiposAsignados($idJuez) {
         global $pdo;
+        
+        // Verificación extra de seguridad
+        if (!$pdo) {
+            return []; // O podrías lanzar un error más descriptivo
+        }
+
         try {
             $stmt = $pdo->prepare("CALL ObtenerEquiposPorJuez(:id)");
             $stmt->execute([':id' => $idJuez]);
